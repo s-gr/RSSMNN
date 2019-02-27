@@ -1,5 +1,6 @@
 # import numpy as np
 import pandas as pd
+import pandas_summary as psm
 
 PATH = 'dataset/'                                                                                   # set path variable for dataset
 
@@ -7,11 +8,10 @@ table_names = ['train', 'store', 'store_states', 'state_names', 'googletrend', '
 tables = [pd.read_csv(f'{PATH}{fname}.csv', low_memory=False) for fname in table_names]             # create list of DataFrames
 
 for t in tables:
-    # print(t.head())                                                                                 # show first 5 lines of all data frames
-    df = t.select_dtypes(include='number')
-    df = df.head()
-    # df = df.describe()
-    df = df.mean(axis=1, )
-    print(df)
+    print(psm.DataFrameSummary(t).summary())                                                        # Display overview of DataFrames using pandas_summary object
 
-    quit()
+
+train, store, store_states, state_names, googletrend, weather, test = tables                        #
+
+print(str(len(train)) + ', ' + str(len(test)))
+
