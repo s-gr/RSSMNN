@@ -83,12 +83,12 @@ for i in range(train_data_X.shape[1]):
     les.append(le)
     train_data_X[:, i] = le.transform(train_data_X[:, i])
 
-with open('les.pickle', 'wb') as f:
+with open('tmp/les.pickle', 'wb') as f:
     pickle.dump(les, f, -1)
 
 print(train_data_y[0])
 print(train_data_y.shape)
 
-with open('feature_train_data.pickle', 'wb') as f:
+with open('tmp/feature_train_data.pickle', 'wb') as f:
     pickle.dump((train_data_X, train_data_y), f, -1)
     print(train_data_X[0], train_data_y[0])
