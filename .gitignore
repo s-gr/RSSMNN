@@ -2,3 +2,4 @@ dataset
 .idea
 *.pickle
 tmp
+.ipynb_checkpoints
