@@ -26,6 +26,10 @@ def load_data(path, table_names):
             table['PromoInterval'].fillna(0, inplace=True)
         if 'CompetitionDistance' in table.columns:
             table['CompetitionDistance'].fillna(0, inplace=True)
+        if 'StateHoliday' in table.columns:                                                     # Simplify State Holiday
+            table.StateHoliday = (table.StateHoliday != '0')
+        # if 'SchoolHoliday' in table.columns:                                                    # Simplify State Holiday
+        #     table['SchoolHoliday'] = (table['SchoolHoliday'] != '0')
         print(table.head())
     return tables
 
@@ -55,7 +59,7 @@ print(psm.DataFrameSummary(joined).summary().T)
 print('\n' + 'Preprocessing features and drop unused ones' + '\n')
 
 joined = joined.loc[(joined['Sales'] != 0) & (joined['Open'] != 0)]
-train_data_X = joined[['Open', 'Store', 'DayOfWeek', 'Promo', 'Year', 'Month', 'Day', 'State']]
+train_data_X = joined[['Open', 'Store', 'DayOfWeek', 'Promo', 'Year', 'Month', 'Day', 'State', 'StateHoliday']]
 train_data_y = joined['Sales']
 train_data_X = train_data_X.apply(preprocessing.LabelEncoder().fit_transform)                   # Map Categories to Integer values 0, 1, ...., #categories - 1
 

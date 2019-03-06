@@ -49,7 +49,7 @@ def plot_history(history):
 
 def split_features(X):                                                                      # Take cats and split them into a "vector"
     X_list = []                                                                             # 0-th column is just 0s since we only allowd 'Open' stores
-    for i in range(1,8):
+    for i in range(1, 9):
         X_list.append(X[..., [i]])
     return X_list
 
@@ -97,11 +97,14 @@ class NNwEE:
         output_germanstate = Embedding(12, 6, name='state_embedding')(input_germanstate)
         output_germanstate = Reshape(target_shape=(6,))(output_germanstate)
 
+        input_holiday = Input(shape=(1,))
+        output_holiday = Dense(1)(input_holiday)
+
         input_model = [input_store, input_dow, input_promo,
-                       input_year, input_month, input_day, input_germanstate]
+                       input_year, input_month, input_day, input_germanstate, input_holiday]
 
         output_embeddings = [output_store, output_dow, output_promo,
-                             output_year, output_month, output_day, output_germanstate]
+                             output_year, output_month, output_day, output_germanstate, output_holiday]
 
         output_model = Concatenate()(output_embeddings)                                     # Concatenate inputs to model
         output_model = Dense(1000, kernel_initializer="uniform")(output_model)
