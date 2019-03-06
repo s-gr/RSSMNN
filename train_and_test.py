@@ -1,7 +1,6 @@
-import pickle
 import numpy
-from model import *
 import pandas as pd
+from model import *
 
 train_ratio = 0.9
 
@@ -22,7 +21,7 @@ def sample(X, y, n):
     return X[indices, :], y[indices]
 
 
-X_train, y_train = sample(X_train, y_train, 400000)  # Simulate data sparsity
+X_train, y_train = sample(X_train, y_train, 200000)  # Simulate data sparsity
 print("Number of samples used for training: " + str(y_train.shape[0]))
 
 print("Fitting NNwEE...")
