@@ -3,7 +3,7 @@ import pandas_summary as psm
 from sklearn import preprocessing
 
 PATH = 'dataset/'  # set path variable for dataset
-table_names = ['train', 'store', 'store_states', 'test']
+table_names = ['station', 'new_trip']
 
 
 def load_data(path, table_names):
