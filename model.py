@@ -119,7 +119,6 @@ class NNwEE:
         self.model.compile(loss='mean_absolute_error', optimizer='adam')
         self.model.summary()
         plot_model(self.model, show_shapes=True, show_layer_names=True, rankdir = 'LR', to_file='tmp/model.png')
-        self.model.compile(loss='mean_absolute_error', optimizer='adam')
 
     def evaluate(self, X_val, y_val):
         assert(min(y_val) > 0)
