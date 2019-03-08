@@ -48,8 +48,8 @@ def plot_history(history):
 
 
 def split_features(X):                                                                      # Take cats and split them into a "vector"
-    X_list = []                                                                             # 0-th column is just 0s since we only allowd 'Open' stores
-    for i in range(1, 9):
+    X_list = []                                                                             # 0-th column is just 0s since we only allowed 'Open' stores
+    for i in range(0, 6):
         X_list.append(X[..., [i]])
     return X_list
 
@@ -70,43 +70,34 @@ class NNwEE:
 
     def __build_keras_model(self):                                                          # Build Model. Starting with individual Embeddings for every cat. Using Keras
                                                                                             # Functional API
-        input_store = Input(shape=(1,))
-        output_store = Embedding(1115, 10, name='store_embedding')(input_store)
-        output_store = Reshape(target_shape=(10,))(output_store)
-
-        input_dow = Input(shape=(1,))
-        output_dow = Embedding(7, 6, name='dow_embedding')(input_dow)
-        output_dow = Reshape(target_shape=(6,))(output_dow)
-
-        input_promo = Input(shape=(1,))
-        output_promo = Dense(1)(input_promo)
+        input_station = Input(shape=(1,))
+        output_station = Embedding(60, 50, name='station_embedding')(input_station)
+        output_station = Reshape(target_shape=(50,))(output_station)
 
         input_year = Input(shape=(1,))
         output_year = Embedding(3, 2, name='year_embedding')(input_year)
         output_year = Reshape(target_shape=(2,))(output_year)
 
-        input_month = Input(shape=(1,))
-        output_month = Embedding(12, 6, name='month_embedding')(input_month)
-        output_month = Reshape(target_shape=(6,))(output_month)
+        input_MoY = Input(shape=(1,))
+        output_MoY = Embedding(12, 6, name='MoY_embedding')(input_MoY)
+        output_MoY = Reshape(target_shape=(6,))(output_MoY)
 
-        input_day = Input(shape=(1,))
-        output_day = Embedding(31, 10, name='day_embedding')(input_day)
-        output_day = Reshape(target_shape=(10,))(output_day)
+        input_DoW = Input(shape=(1,))
+        output_DoW = Embedding(7, 7, name='DoW_embedding')(input_DoW)
+        output_DoW = Reshape(target_shape=(7,))(output_DoW)
 
-        input_germanstate = Input(shape=(1,))
-        output_germanstate = Embedding(12, 6, name='state_embedding')(input_germanstate)
-        output_germanstate = Reshape(target_shape=(6,))(output_germanstate)
+        input_DoM = Input(shape=(1,))
+        output_DoM = Embedding(31, 50, name='DoM_embedding')(input_DoM)
+        output_DoM = Reshape(target_shape=(50,))(output_DoM)
 
-        input_holiday = Input(shape=(1,))
-        output_holiday = Dense(1)(input_holiday)
+        input_HoD = Input(shape=(1,))
+        output_HoD = Embedding(24, 50, name='HoD_embedding')(input_HoD)
+        output_HoD = Reshape(target_shape=(50,))(output_HoD)
 
-        input_model = [input_store, input_dow, input_promo,
-                       input_year, input_month, input_day, input_germanstate, input_holiday]
+        input_model = [input_station, input_MoY, input_year, input_DoW, input_DoM, input_HoD]
+        output_embeddings = [output_station, output_MoY, output_year, output_DoW, output_DoM, output_HoD]
 
-        output_embeddings = [output_store, output_dow, output_promo,
-                             output_year, output_month, output_day, output_germanstate, output_holiday]
-
-        output_model = Concatenate()(output_embeddings)                                     # Concatenate inputs to model
+        output_model = Concatenate()(output_embeddings)                                                         # Concatenate inputs to model
         output_model = Dense(1000, kernel_initializer="uniform")(output_model)
         output_model = Activation('relu')(output_model)
         output_model = Dense(500, kernel_initializer="uniform")(output_model)

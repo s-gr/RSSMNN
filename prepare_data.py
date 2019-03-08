@@ -51,11 +51,7 @@ def load_data(path, table_names):
 
 def generate_features(df):                                                                              # Generate new features
     df['start_Date'] = df.starttime.dt.date
-    df['start_Year'] = df.starttime.dt.year
-    df['start_MonthOfYear'] = df.starttime.dt.month
-    df['start_DayOfWeek'] = df.starttime.dt.day
     df['start_HourOfDay'] = df.starttime.dt.hour
-
     df_temp = df.groupby(['from_station_id', 'start_Date', 'start_HourOfDay'])['trip_id'].count()
     df_temp = df_temp.reset_index()
     df_temp.rename(columns={'trip_id': 'trip_count'}, inplace=True)
@@ -68,6 +64,14 @@ def generate_features(df):                                                      
 
     df = pd.concat([df, df_temp], axis=1, sort=False)
     df = df.loc[:, ~df.columns.duplicated()]
+
+    df['start_Date'] = pd.to_datetime(df['start_Date'])
+    df['start_Year'] = df.start_Date.dt.year
+    df['start_MonthOfYear'] = df.start_Date.dt.month
+    df['start_DayOfWeek'] = df.start_Date.dt.dayofweek
+    df['start_DayOfMonth'] = df.start_Date.dt.day
+    df.drop(columns=['start_Date'], inplace=True)
+    df = df.reset_index(drop=True)
     print(psm.DataFrameSummary(df).summary())
 
     return df
@@ -80,7 +84,7 @@ trip = generate_features(trip)
 
 print('\n' + 'Preprocessing features and drop unused ones' + '\n')
 
-train_data_X = trip[['from_station_id', 'start_Date', 'start_HourOfDay']]
+train_data_X = trip[['from_station_id', 'start_Year', 'start_MonthOfYear', 'start_DayOfWeek', 'start_DayOfMonth', 'start_HourOfDay']]
 train_data_y = trip[['trip_count']]
 train_data_X = train_data_X.apply(preprocessing.LabelEncoder().fit_transform)                   # Map Categories to Integer values 0, 1, ...., #categories - 1
 
