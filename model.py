@@ -1,5 +1,6 @@
 import os
 import numpy as np
+import pandas as pd
 import matplotlib.pyplot as plt
 
 from keras.models import Model as KerasModel
@@ -7,6 +8,7 @@ from keras.layers import Input, Dense, Activation, Reshape, Embedding, Concatena
 from keras.callbacks import ModelCheckpoint
 from keras.utils import plot_model
 from keras import regularizers
+import keras as krs
 
 
 def plot_history(history):
@@ -68,8 +70,8 @@ class NNwEE:
 
     def __init__(self, X_train, y_train, X_val, y_val):
         # super().__init__()
-        self.epochs = 1
-        self.checkpointer = ModelCheckpoint(filepath="best_model_weights.hdf5", verbose=1, save_best_only=True)
+        self.epochs = 20
+        # self.checkpointer = ModelCheckpoint(filepath="best_model_weights.hdf5", verbose=1, save_best_only=True)
         self.max_log_y = max(np.max(np.log(y_train)), np.max(np.log(y_val)))
         self.__build_keras_model()
         self.fit(X_train, y_train, X_val, y_val)
@@ -81,43 +83,39 @@ class NNwEE:
     def __build_keras_model(self):                                                          # Build Model. Starting with individual Embeddings for every cat. Using Keras
                                                                                             # Functional API
         input_station = Input(shape=(1,))
-        output_station = Embedding(60, 50, name='station_embedding')(input_station)
-        output_station = Reshape(target_shape=(50,))(output_station)
+        output_station = Embedding(60, 10, name='station_embedding')(input_station)
+        output_station = Reshape(target_shape=(10,))(output_station)
 
         input_year = Input(shape=(1,))
         output_year = Embedding(3, 2, name='year_embedding')(input_year)
         output_year = Reshape(target_shape=(2,))(output_year)
 
         input_MoY = Input(shape=(1,))
-        output_MoY = Embedding(12, 6, name='MoY_embedding')(input_MoY)
-        output_MoY = Reshape(target_shape=(6,))(output_MoY)
+        output_MoY = Embedding(12, 4, name='MoY_embedding')(input_MoY)
+        output_MoY = Reshape(target_shape=(4,))(output_MoY)
 
         input_DoW = Input(shape=(1,))
-        output_DoW = Embedding(7, 4, name='DoW_embedding')(input_DoW)
-        output_DoW = Reshape(target_shape=(4,))(output_DoW)
+        output_DoW = Embedding(7, 3, name='DoW_embedding')(input_DoW)
+        output_DoW = Reshape(target_shape=(3,))(output_DoW)
 
         input_DoM = Input(shape=(1,))
-        output_DoM = Embedding(31, 15, name='DoM_embedding')(input_DoM)
-        output_DoM = Reshape(target_shape=(15,))(output_DoM)
+        output_DoM = Embedding(31, 10, name='DoM_embedding')(input_DoM)
+        output_DoM = Reshape(target_shape=(10,))(output_DoM)
 
         input_HoD = Input(shape=(1,))
-        output_HoD = Embedding(24, 20, name='HoD_embedding')(input_HoD)
-        output_HoD = Reshape(target_shape=(20,))(output_HoD)
+        output_HoD = Embedding(24, 10, name='HoD_embedding')(input_HoD)
+        output_HoD = Reshape(target_shape=(10,))(output_HoD)
 
         input_model = [input_station, input_MoY, input_year, input_DoW, input_DoM, input_HoD]
         output_embeddings = [output_station, output_MoY, output_year, output_DoW, output_DoM, output_HoD]
 
         output_model = Concatenate()(output_embeddings)                                                         # Concatenate inputs to model
         output_model = Dense(1000, kernel_initializer="uniform")(output_model)
-        output_model = BatchNormalization()(output_model)
-        output_model = Activation('relu')(output_model)
-        output_model = Dropout(0.6)(output_model)
-        output_model = Dense(1000, kernel_initializer="uniform")(output_model)
-        output_model = BatchNormalization()(output_model)
+        # output_model = BatchNormalization()(output_model)
         output_model = Activation('relu')(output_model)
         output_model = Dropout(0.5)(output_model)
         output_model = Dense(500, kernel_initializer="uniform")(output_model)
-        output_model = BatchNormalization()(output_model)
+        # output_model = BatchNormalization()(output_model)
         output_model = Activation('relu')(output_model)
         output_model = Dropout(0.5)(output_model)
         output_model = Dense(1)(output_model)
@@ -126,15 +124,18 @@ class NNwEE:
 
         self.model = KerasModel(inputs=input_model, outputs=output_model)
 
-        self.model.compile(loss='mean_absolute_error', optimizer='adam')
+        self.model.compile(loss='mean_absolute_error', optimizer=krs.optimizers.Adam(lr=0.001))    # , optimizer='adam')
         self.model.summary()
         plot_model(self.model, show_shapes=True, show_layer_names=True, rankdir = 'LR', to_file='tmp/model.png')
 
     def evaluate(self, X_val, y_val):
         assert(min(y_val) > 0)
         guessed_demand = self.guess(X_val)
-        relative_err = np.absolute((y_val - guessed_demand) / y_val)
-        result = np.sum(relative_err) / len(y_val)
+        guessed_demand = guessed_demand.reshape(guessed_demand.size, 1)
+        pd.DataFrame(guessed_demand).to_csv('tmp/gd.csv')
+        pd.DataFrame(y_val).to_csv('tmp/v_val.csv')
+        relative_err = np.absolute((y_val - guessed_demand))  # / y_val)
+        result = np.sum(relative_err) / y_val.size
         return result
 
     def _val_for_fit(self, val):                                                                                # Set y-value to log(y) for fitting
@@ -147,14 +148,20 @@ class NNwEE:
     def fit(self, X_train, y_train, X_val, y_val):
         history = self.model.fit(self.preprocessing(X_train), self._val_for_fit(y_train),
                                  validation_data=(self.preprocessing(X_val), self._val_for_fit(y_val)),
-                                 epochs=self.epochs, batch_size=32,
-                                 callbacks=[self.checkpointer]
-                                )
-        self.model.load_weights('best_model_weights.hdf5')
+                                 epochs=self.epochs, batch_size=128) #,callbacks=[self.checkpointer]
+        # self.model.load_weights('best_model_weights.hdf5')
         plot_history(history)
         print("Result on validation data: ", self.evaluate(X_val, y_val))
+    # def fit(self, X_train, y_train, X_val, y_val):
+    #     history = self.model.fit(self.preprocessing(X_train), y_train,
+    #                              validation_data=(self.preprocessing(X_val), y_val),
+    #                              epochs=self.epochs, batch_size=128) #,callbacks=[self.checkpointer]
+    #     # self.model.load_weights('best_model_weights.hdf5')
+    #     plot_history(history)
+    #     print("Result on validation data: ", self.evaluate(X_val, y_val))
 
     def guess(self, features):
         features = self.preprocessing(features)
         result = self.model.predict(features).flatten()
+        pd.DataFrame(result).to_csv('tmp/gd_train.csv')
         return self._val_for_pred(result)

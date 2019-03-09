@@ -42,10 +42,6 @@ def load_data(path, table_names):
 
     # filling NAs in gender to 'NA'
     trip['gender'] = trip['gender'].fillna('NA')
-
-    # for i, table in enumerate(list([station, trip])):
-    #     table.to_pickle(f'tmp/df{i}.pickle')
-    #     print(psm.DataFrameSummary(table).summary().T)
     return station, trip
 
 
@@ -80,16 +76,11 @@ def generate_features(df):                                                      
 station, trip = load_data(PATH, table_names)
 trip = generate_features(trip)
 
-# trip = pd.read_pickle('tmp/train.pickle')
-
 print('\n' + 'Preprocessing features and drop unused ones' + '\n')
 
 train_data_X = trip[['from_station_id', 'start_Year', 'start_MonthOfYear', 'start_DayOfWeek', 'start_DayOfMonth', 'start_HourOfDay']]
 train_data_y = trip[['trip_count']]
 train_data_X = train_data_X.apply(preprocessing.LabelEncoder().fit_transform)                   # Map Categories to Integer values 0, 1, ...., #categories - 1
-
-# print(psm.DataFrameSummary(train_data_X).summary())
-# print(train_data_X.head())
 
 train_data_X.to_pickle('tmp/train_data_X.pickle')
 train_data_y.to_pickle('tmp/train_data_y.pickle')
