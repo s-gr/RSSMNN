@@ -87,6 +87,6 @@ train_data_y = trip[['trip_count']]
 train_data_X = train_data_X.apply(preprocessing.LabelEncoder().fit_transform)                   # Map Categories to Integer values 0, 1, ...., #categories - 1
 
 
-print(psm.DataFrameSummary(df).summary())
+# print(psm.DataFrameSummary(df).summary())
 train_data_X.to_pickle('tmp/train_data_X.pickle')
 train_data_y.to_pickle('tmp/train_data_y.pickle')

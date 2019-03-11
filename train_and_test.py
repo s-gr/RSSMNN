@@ -10,8 +10,8 @@ y = pd.read_pickle('tmp/train_data_y.pickle').values
 pd.DataFrame(y).to_csv('tmp/y_val.csv')
 
 
-y_OHE = np.zeros((X.shape[0], 20))
-y_OHE[:, 8] = np.ones(X.shape[0])
+y_OHE = np.zeros((X.shape[0], len(np.unique(y))))
+# y_OHE[:, 8] = np.ones(X.shape[0])
 y_OHE = preprocessing.OneHotEncoder(sparse=False).fit_transform(y)
 
 train_ratio = 0.9
@@ -23,6 +23,7 @@ X_val = X[train_size:]
 # y_val = y[train_size:]
 y_train = y_OHE[:train_size, :]
 y_val = y_OHE[train_size:, :]
+
 
 def plot_confusion_matrix(y_true, y_val,
                           normalize=False,
@@ -93,4 +94,5 @@ def model_trainer(model_loc, X_tr, y_tr, X_true, y_true, num_iter=1000):
 
 
 model_NNwEE = NNwEE(X_train, y_train, X_val, y_val, epochs_given=1)
+# evaluate_model(model_NNwEE, X_val, y_val)
 model_trainer(model_NNwEE, X_train, y_train, X_val, y_val)

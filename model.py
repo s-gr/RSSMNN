@@ -75,6 +75,7 @@ class NNwEE:
         self.dim_inputs = X_train.shape[1]
         self.dim_output = y_train.shape[1]
         self.checkpointer = ModelCheckpoint(filepath="weights/model_weights.hdf5", verbose=1, save_best_only=True)
+        # self.max_log_y = max(np.max(np.log(y_train)), np.max(np.log(y_val)))
         self.__build_keras_model()
         self.fit(X_train, y_train, X_val, y_val)
 
@@ -146,6 +147,13 @@ class NNwEE:
             self.model.load_weights('weights/model_weights.hdf5')
         plot_model(self.model, show_shapes=True, show_layer_names=True, rankdir='LR', to_file='tmp/model.png')
         self.model.summary()
+
+    # def _val_for_fit(self, val):  # Set y-value to log(y) for fitting
+    #     val = np.log(val) / self.max_log_y
+    #     return val
+    #
+    # def _val_for_pred(self, val):  # back transform to non log value of y
+    #     return np.exp(val * self.max_log_y)
 
     def fit(self, X_train, y_train, X_val, y_val):
         history = self.model.fit(self.preprocessing(X_train), y_train,
