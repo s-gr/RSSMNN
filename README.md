@@ -51,3 +51,7 @@ Things to discuss
     measure a models quality
         - what are the standard libraries, look at Paulo's task.html to understand which tools he used and why
     - get familiar with all the ML models, learn pros and cons, their frameworks
+    
+Some additional information
+- It is difficult to get a very good model running in 2 weeks!
+- It is always beneficial to get more data points!
