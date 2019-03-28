@@ -1,28 +1,28 @@
 import numpy as np
 import pandas as pd
-from sklearn import preprocessing
+import pandas_summary as pdsm
+from sklearn.preprocessing import LabelEncoder, OneHotEncoder
 from sklearn.metrics import classification_report, confusion_matrix
 from sklearn.utils.multiclass import unique_labels
 from model import *
 
-X = pd.read_pickle('tmp/train_data_X.pickle').values
-y = pd.read_pickle('tmp/train_data_y.pickle').values
-pd.DataFrame(y).to_csv('tmp/y_val.csv')
-
-
-y_OHE = np.zeros((X.shape[0], len(np.unique(y))))
-# y_OHE[:, 8] = np.ones(X.shape[0])
-y_OHE = preprocessing.OneHotEncoder(sparse=False).fit_transform(y)
-
-train_ratio = 0.9
-train_size = int(train_ratio * len(X))
-
-X_train = X[:train_size]
-X_val = X[train_size:]
+# X = pd.read_pickle('tmp/train_data_X.pickle').values
+# y = pd.read_pickle('tmp/train_data_y.pickle').values
+#
+# # y_OHE = np.zeros((X.shape[0], len(np.unique(y))))
+# # y_OHE[:, 8] = np.ones(X.shape[0])
+# # y_OHE = OneHotEncoder(sparse=False).fit_transform(y)
+#
+# train_ratio = 0.9
+# train_size = int(train_ratio * len(X))
+#
+# X_train = X[:train_size]
+# X_val = X[train_size:]
 # y_train = y[:train_size]
 # y_val = y[train_size:]
-y_train = y_OHE[:train_size, :]
-y_val = y_OHE[train_size:, :]
+# pd.DataFrame(y_val).to_csv('tmp/y_val.csv')
+# # y_train = y_OHE[:train_size, :]
+# # y_val = y_OHE[train_size:, :]
 
 
 def plot_confusion_matrix(y_true, y_val,
@@ -76,12 +76,27 @@ def plot_confusion_matrix(y_true, y_val,
     return acc  # , prec, rec
 
 
+# def evaluate_model(model_loc, X_true, y_true):
+#     y_pred = np.array([model_loc.guess(X_true)])
+#     y_true = y_true.argmax(1)
+#     y_pred = y_pred.reshape((-1, 1))
+#     # acc = plot_confusion_matrix(y_true, y_pred)
+#     return # acc
+
+
 def evaluate_model(model_loc, X_true, y_true):
+    assert(min(y_true) >= 0)
     y_pred = np.array([model_loc.guess(X_true)])
-    y_true = y_true.argmax(1)
-    y_pred = y_pred.reshape((-1, 1))
-    acc = plot_confusion_matrix(y_true, y_pred)
-    return acc
+    relative_err = np.absolute(y_true - y_pred.T)
+    result = np.sum(relative_err) / len(y_true)
+    return result
+
+
+def evaluate_model_OHE(model_loc, X_true, y_true):
+    y_pred = np.array([model_loc.guess(model_loc.preprocessing_OHE(X_true))])
+    relative_err = np.absolute(y_true - y_pred)
+    result = np.sum(relative_err) / len(y_true)
+    return result
 
 
 def model_trainer(model_loc, X_tr, y_tr, X_true, y_true, num_iter=1000):
@@ -89,10 +104,11 @@ def model_trainer(model_loc, X_tr, y_tr, X_true, y_true, num_iter=1000):
     model_loc.set_epochs(100)
     for run_iter in range(0, num_iter):
         model_loc.fit(X_tr, y_tr, X_true, y_true)
-        acc = evaluate_model(model_NNwEE, X_true, y_true)
-        os.system(f"echo '{run_iter}. iteration with acc, {str(acc)}' >> tmp/{test_count}report.csv")
+        res = evaluate_model(model_loc, X_true, y_true)
+        os.system(f"echo '{run_iter}. iteration with mae, {str(res)}' >> tmp/{test_count}report.csv")
 
 
-model_NNwEE = NNwEE(X_train, y_train, X_val, y_val, epochs_given=1)
-# evaluate_model(model_NNwEE, X_val, y_val)
-model_trainer(model_NNwEE, X_train, y_train, X_val, y_val)
+# model_NNwEE = NNwEE(X_train, y_train, X_val, y_val, epochs_given=200)
+# res = evaluate_model(model_NNwEE, X_val, y_val)
+# print('rmsle: ' + str(res))
+# model_trainer(model_NNwEE, X_train, y_train, X_val, y_val)
