@@ -205,4 +205,4 @@ class NNwEE:
     #     pd.DataFrame(result).to_csv('tmp/y_pred.csv')
     #     return result
 
-# und nu
+# un
