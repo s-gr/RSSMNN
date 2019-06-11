@@ -1,7 +1,7 @@
 import os.path
 import numpy as np
 import pandas as pd
-import pandas_summary as psm
+# import pandas_summary as psm
 from sklearn import preprocessing
 
 # PATH = 'dataset/'  # set path variable for dataset

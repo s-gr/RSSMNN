@@ -1,28 +1,28 @@
 import numpy as np
 import pandas as pd
-import pandas_summary as pdsm
+# import pandas_summary as pdsm
 from sklearn.preprocessing import LabelEncoder, OneHotEncoder
 from sklearn.metrics import classification_report, confusion_matrix
 from sklearn.utils.multiclass import unique_labels
 from model import *
 
-# X = pd.read_pickle('tmp/train_data_X.pickle').values
-# y = pd.read_pickle('tmp/train_data_y.pickle').values
+X = pd.read_pickle('tmp/train_data_X.pickle').values
+y = pd.read_pickle('tmp/train_data_y.pickle').values
 #
 # # y_OHE = np.zeros((X.shape[0], len(np.unique(y))))
 # # y_OHE[:, 8] = np.ones(X.shape[0])
 # # y_OHE = OneHotEncoder(sparse=False).fit_transform(y)
 #
-# train_ratio = 0.9
-# train_size = int(train_ratio * len(X))
-#
-# X_train = X[:train_size]
-# X_val = X[train_size:]
-# y_train = y[:train_size]
-# y_val = y[train_size:]
-# pd.DataFrame(y_val).to_csv('tmp/y_val.csv')
-# # y_train = y_OHE[:train_size, :]
-# # y_val = y_OHE[train_size:, :]
+train_ratio = 0.9
+train_size = int(train_ratio * len(X))
+
+X_train = X[:train_size]
+X_val = X[train_size:]
+y_train = y[:train_size]
+y_val = y[train_size:]
+pd.DataFrame(y_val).to_csv('tmp/y_val.csv')
+# y_train = y_OHE[:train_size, :]
+# y_val = y_OHE[train_size:, :]
 
 
 def plot_confusion_matrix(y_true, y_val,
@@ -108,7 +108,7 @@ def model_trainer(model_loc, X_tr, y_tr, X_true, y_true, num_iter=1000):
         os.system(f"echo '{run_iter}. iteration with mae, {str(res)}' >> tmp/{test_count}report.csv")
 
 
-# model_NNwEE = NNwEE(X_train, y_train, X_val, y_val, epochs_given=200)
-# res = evaluate_model(model_NNwEE, X_val, y_val)
-# print('rmsle: ' + str(res))
+model_NNwEE = NNwEE(X_train, y_train, X_val, y_val, epochs_given=200)
+res = evaluate_model(model_NNwEE, X_val, y_val)
+print('rmsle: ' + str(res))
 # model_trainer(model_NNwEE, X_train, y_train, X_val, y_val)

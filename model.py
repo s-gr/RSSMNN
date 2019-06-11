@@ -69,16 +69,19 @@ def split_features(X):
     return X_list
 
 
-def split_features_OHE(X):                      # TODO: Dynamically choose number of n_values depending on feature selection.
-    X_OHE = OneHotEncoder(sparse=False, n_values=61).fit_transform(X[..., [0]])
-    X_OHE =  np.concatenate((X_OHE, OneHotEncoder(sparse=False, n_values=3).fit_transform(X[..., [1]])), axis=1)
-    X_OHE = np.concatenate((X_OHE, OneHotEncoder(sparse=False, n_values=12).fit_transform(X[..., [2]])), axis=1)
-    X_OHE = np.concatenate((X_OHE, OneHotEncoder(sparse=False, n_values=53).fit_transform(X[..., [3]])), axis=1)
-    X_OHE = np.concatenate((X_OHE, OneHotEncoder(sparse=False, n_values=7).fit_transform(X[..., [4]])), axis=1)
-    X_OHE = np.concatenate((X_OHE, OneHotEncoder(sparse=False, n_values=31).fit_transform(X[..., [5]])), axis=1)
-    X_OHE = np.concatenate((X_OHE, OneHotEncoder(sparse=False, n_values=24).fit_transform(X[..., [6]])), axis=1)
-    # for i in range(1, X.shape[1]):
-    #     X_OHE = np.concatenate((X_OHE, OneHotEncoder(sparse=False).fit_transform(X[..., [i]])), axis=1)
+def split_features_OHE(X):                    # TODO: Dynamically choose number of n_values depending on feature selection.
+    # X_OHE = OneHotEncoder(sparse=False, n_values=61).fit_transform(X[..., [0]])
+    # X_OHE = np.concatenate((X_OHE, OneHotEncoder(sparse=False, n_values=3).fit_transform(X[..., [1]])), axis=1)
+    # X_OHE = np.concatenate((X_OHE, OneHotEncoder(sparse=False, n_values=12).fit_transform(X[..., [2]])), axis=1)
+    # X_OHE = np.concatenate((X_OHE, OneHotEncoder(sparse=False, n_values=53).fit_transform(X[..., [3]])), axis=1)
+    # X_OHE = np.concatenate((X_OHE, OneHotEncoder(sparse=False, n_values=7).fit_transform(X[..., [4]])), axis=1)
+    # X_OHE = np.concatenate((X_OHE, OneHotEncoder(sparse=False, n_values=31).fit_transform(X[..., [5]])), axis=1)
+    # X_OHE = np.concatenate((X_OHE, OneHotEncoder(sparse=False, n_values=24).fit_transform(X[..., [6]])), axis=1)
+    for clmn in range(0, X.shape[1]):
+        if clmn==0:
+            X_OHE = OneHotEncoder(sparse=False, n_values=61).fit_transform(X[..., [clmn]])
+        else:
+            X_OHE = np.concatenate((X_OHE, OneHotEncoder(sparse=False, n_values=len(np.unique(X[:,clmn]))).fit_transform(X[..., [clmn]])), axis=1)
     return X_OHE
 
 
@@ -94,8 +97,8 @@ class NNwEE:
         self.fit(X_train, y_train, X_val, y_val)
 
     def preprocessing(self, X):
-        X_OHE = split_features(X)
-        return X_OHE
+        X = split_features(X)
+        return X
 
     def preprocessing_OHE(self, X):
         X_list = split_features_OHE(X)
